@@ -1,0 +1,78 @@
+---
+title: "Clean HRS data"
+author: "Fiona Norton"
+format: html
+editor: visual
+---
+
+1.  Download RAND HRS Longitudinal File 2020
+
+This is a slightly limited but clean and easy-to-use data product containing information from Core and Exit Interviews of the HRS. It contains variables on demographics, health, health insurance, Social Security, pensions, family structure, retirement plans, expectations, employment history, and imputations for income, assets, and medical expenditures developed at RAND.
+
+Each row in this data set is a unique person interviewed at some point during the waves of the HRS study. Every individual who has ever completed an HRS Core Interview has a record in this file. In households with a married or partnered couple, both Respondents' records also capture HRS responses given by the spouse or partner.
+
+Information from documentation: https://www.rand.org/content/dam/rand/www/external/labor/aging/dataprod/randhrs1992_2020v1.pdf
+
+2.  Set working directory to source file location
+
+```{r}
+library(haven)
+library(dplyr)
+library(tidyverse)
+
+filename = "Veteran Research/Veteran_Health_Research/randhrs1992_2020v1_SAS/randhrs1992_2020v1.sas7bdat"
+longitudinal_file <- read_sas(filename, NULL)
+#randhrs1992_2020 <- read_sas("Veteran Research/Veteran_Health_Research/randhrs1992_2020v1_SAS/randhrs1992_2020v1.sas7bdat", NULL)
+```
+
+3.  Define which variables needed from the longitudinal file as 'selection'
+
+```{r}
+selection = c('HHIDPN', 'RAWTSAMP', 'R1WTRESP', 'R2WTRESP', 'R3WTRESP', 'R4WTRESP', 'R5WTRESP', 'R6WTRESP', 'R7WTRESP', 'R8WTRESP', 'R9WTRESP', 'R10WTRESP', 'R11WTRESP', 'R12WTRESP', 'R13WTRESP', 'R14WTRESP', 'INW9', 'INW10', 'INW11', 'INW12', 'INW13', 'INW14', 'INW15', 'RABYEAR', 'RADYEAR', 'RAGENDER', 'RARACEM', 'RAHISPAN', 'RAEDYRS', 'RAEDEGRM', 'RAMEDUC', 'RAFEDUC', 'RAVETRN', 'R9SHLT', 'R10SHLT', 'R11SHLT', 'R12SHLT', 'R13SHLT', 'R14SHLT', 'R15SHLT', 'R9HOSP', 'R10HOSP', 'R11HOSP', 'R12HOSP', 'R13HOSP', 'R14HOSP', 'R15HOSP', 'R9DOCTIM', 'R10DOCTIM', 'R11DOCTIM', 'R12DOCTIM', 'R13DOCTIM', 'R14DOCTIM', 'R15DOCTIM', 'R9DEPRES', 'R10DEPRES', 'R11DEPRES', 'R12DEPRES', 'R13DEPRES', 'R14DEPRES', 'R15DEPRES', 'R9SLEEPR', 'R10SLEEPR', 'R11SLEEPR', 'R12SLEEPR', 'R13SLEEPR', 'R14SLEEPR', 'R15SLEEPR', 'R9HIBP', 'R10HIBP', 'R11HIBP', 'R12HIBP', 'R13HIBP', 'R14HIBP', 'R15HIBP', 'R9DIAB', 'R10DIAB', 'R11DIAB', 'R12DIAB', 'R13DIAB', 'R14DIAB', 'R15DIAB', 'R9CANCR', 'R10CANCR', 'R11CANCR', 'R12CANCR', 'R13CANCR', 'R14CANCR', 'R15CANCR', 'R9LUNG', 'R10LUNG', 'R11LUNG', 'R12LUNG', 'R13LUNG', 'R14LUNG', 'R15LUNG', 'R9HEART', 'R10HEART', 'R11HEART', 'R12HEART', 'R13HEART', 'R14HEART', 'R15HEART', 'R9STROK', 'R10STROK', 'R11STROK', 'R12STROK', 'R13STROK', 'R14STROK', 'R15STROK', 'R9STROK', 'R10STROK', 'R11STROK', 'R12STROK', 'R13STROK', 'R14STROK', 'R15STROK')
+
+# R9MSTAT, R10MSTAT, R11MSTAT, R12MSTAT, R13MSTAT, R14MSTAT, R15MSTAT,
+# R9STROK, R10STROK, R11STROK, R12STROK, R13STROK, R14STROK, R15STROK,
+# R9PSYCH, R10PSYCH, R11PSYCH, R12PSYCH, R13PSYCH, R14PSYCH, R15PSYCH,
+# R9ARTHR, R10ARTHR, R11ARTHR, R12ARTHR, R13ARTHR, R14ARTHR, R15ARTHR,
+# R9SLFMEM, R10SLFMEM, R11SLFMEM, R12SLFMEM, R13SLFMEM,
+# R9HLTHLM, R10HLTHLM, R11HLTHLM, R12HLTHLM, R13HLTHLM, R14HLTHLM, R15HLTHLM,
+# R9DRINK, R10DRINK, R11DRINK, R12DRINK, R13DRINK, R14DRINK, R15DRINK,
+# H9ATOTB, H10ATOTB, H11ATOTB, H12ATOTB, H13ATOTB, H14ATOTB, H15ATOTB,
+# # finances/income
+# R9IEARN, R10IEARN, R11IEARN, R12IEARN, R13IEARN, R14IEARN, R15IEARN,
+# H9ITOT, H10ITOT, H11ITOT, H12ITOT, H13ITOT, H14ITOT, H15ITOT,
+# # government assistance
+# RASSRECV,
+# RASSAGEB,
+# R9HIGOV, R10HIGOV, R11HIGOV, R12HIGOV, R13HIGOV, R14HIGOV, R15HIGOV,
+# # self-predicted lifespan
+# R9LIV75, R10LIV75, R11LIV75, R12LIV75, R13LIV75, R14LIV75, R15LIV75,
+# R9LIV10, R10LIV10, R11LIV10, R12LIV10, R13LIV10, R14LIV10, R15LIV10)
+```
+
+4.  Create new dataframe with selection variables
+
+```{r}
+HRS_data <- longitudinal_file |> 
+  select(all_of(selection))
+```
+
+5.  Download years of HRS RAND data needed for merging data
+
+```{r}
+merge_year <- function(original_data, filename, variables) {
+  data <- read_sas(filename, NULL)
+  data <- data |> 
+    select(all_of(variables))
+  merged_data <- original_data |> 
+  left_join(data, by = "HHIDPN")
+}
+```
+
+```{r}
+year08 = "HRS_Data/h08f3a.sas7bdat"
+variables = c('HHIDPN', 'LB000', 'LB020', 'LB019', 'LB120', 'LB122', 'LB124', 'LLB037C')
+
+marged_data <- merge_year(year08, variables)
+```
+
